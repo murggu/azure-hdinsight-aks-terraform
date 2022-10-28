@@ -3,115 +3,145 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "clusterName": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "The name of the HDInsight cluster Gen2 to create"
             }
         },
         "clusterPoolName": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "The name of the HDInsight cluster pool where the cluster to be created"
             }
         },
         "location": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "The location where all Azure resources will be deployed"
             }
         },
         "clusterType": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "The type of the cluster to be created"
             }
         },
         "workerNodeVMSize": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "VM SKU selected for the worker node"
             }
         },
         "workerNodeCount": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "Worker node count"
             }
         },
         "clusterVersion": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "The version of the cluster to be created"
             }
         },
         "currentUserObjectId": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "Object id of the logged in user"
             }
         },
         "msiResourceId": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "User managed identity resource id"
             }
         },
         "msiClientId": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "User managed identity client id"
             }
         },
         "msiObjectId": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "User managed identity object id"
             }
         },
         "isLogAnalyticsEnabled": {
-            "type": "Bool",
+            "type": "bool",
             "metadata": {
                 "description": "Flag which enables Log Analytics for the cluster"
             }
         },
         "isLogAnalyticsStdErrorEnabled": {
-            "type": "Bool",
+            "type": "bool",
             "metadata": {
                 "description": "Flag which enables standard error logs ingestion to Log Analytics workspace"
             }
         },
         "isLogAnalyticsStdOutEnabled": {
-            "type": "Bool",
+            "type": "bool",
             "metadata": {
                 "description": "Flag which enables standard out logs ingestion to Log Analytics workspace"
             }
         },
         "isLogAnalyticsMetricsEnabled": {
-            "type": "Bool",
+            "type": "bool",
             "metadata": {
                 "description": "Flag which enables JMX metrics ingestion to Log Analytics workspace"
             }
         },
+        "hiveDBPasswordKeyVaultId": {
+            "type": "string",
+            "metadata": {
+                "description": "Resource Id of the keyvault which holds Hive metastore SQL database login password secret"
+            }
+        },
+        "hiveDBPasswordSecretName": {
+            "type": "string",
+            "metadata": {
+                "description": "Keyvault secret which holds Hive metastore SQL database login password"
+            }
+        },
         "storageAccountEndpoint": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "Storage account endpoint"
             }
         },
         "storageAccountContainer": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "Filesystem/container in the given storage"
             }
         },
+        "hiveDatabaseServer": {
+            "type": "string",
+            "metadata": {
+                "description": "Hive metastore SQL server name"
+            }
+        },
+        "hiveDatabaseName": {
+            "type": "string",
+            "metadata": {
+                "description": "Hive metastore SQL database name"
+            }
+        },
+        "hiveDatabaseUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "Hive metastore SQL database login username"
+            }
+        },
         "secureShellNodeCount": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "Secure shell (SSH) pod count"
             }
         },
         "secureShellPodPrefix": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "Secure shell (SSH) endpoint prefix"
             }
@@ -124,10 +154,10 @@
     },
     "resources": [
         {
-            "type": "Microsoft.HDInsight/clusterpools/clusters",
-            "apiVersion": "[variables('clusterGen2ApiVersion')]",
             "name": "[variables('fullClusterName')]",
+            "type": "Microsoft.HDInsight/clusterpools/clusters",
             "location": "[parameters('location')]",
+            "apiVersion": "[variables('clusterGen2ApiVersion')]",
             "tags": {},
             "properties": {
                 "clusterType": "[parameters('clusterType')]",
@@ -145,7 +175,16 @@
                     "authorizationProfile": {
                         "userIds": "[array(parameters('currentUserObjectId'))]"
                     },
-                    "secretsProfile": null,
+                    "secretsProfile": {
+                        "keyVaultResourceId": "[parameters('hiveDBPasswordKeyVaultId')]",
+                        "secrets": [
+                            {
+                                "referenceName": "[parameters('hiveDBPasswordSecretName')]",
+                                "type": "secret",
+                                "keyVaultObjectName": "[parameters('hiveDBPasswordSecretName')]"
+                            }
+                        ]
+                    },
                     "serviceConfigsProfiles": [],
                     "logAnalyticsProfile": {
                         "enabled": "[bool(parameters('isLogAnalyticsEnabled'))]",
@@ -160,35 +199,18 @@
                         "podPrefix": "[parameters('secureShellPodPrefix')]"
                     },
                     "sparkProfile": {
-                        "defaultStorageUrl": "[concat('abfs://',parameters('storageAccountContainer'), '@', parameters('storageAccountEndpoint'),'/')]"
+                        "defaultStorageUrl": "[concat('abfs://',parameters('storageAccountContainer'), '@', parameters('storageAccountEndpoint'),'/')]",
+                        "metastoreSpec": {
+                            "dbServerHost": "[concat(parameters('hiveDatabaseServer'), '.database.windows.net')]",
+                            "dbName": "[parameters('hiveDatabaseName')]",
+                            "dbUserName": "[parameters('hiveDatabaseUserName')]",
+                            "dbPasswordSecretName": "[parameters('hiveDBPasswordSecretName')]",
+                            "keyvaultId": "[parameters('hiveDBPasswordKeyVaultId')]",
+                            "keyVaultId": "[parameters('hiveDBPasswordKeyVaultId')]"
+                        }
                     }
                 }
             }
-        },
-        {
-            "type": "Microsoft.Resources/deployments",
-            "apiVersion": "2021-04-01",
-            "name": "[guid('rg-aimurg-eu2', 'staimurgeu2')]",
-            "properties": {
-                "mode": "Incremental",
-                "template": {
-                    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-                    "contentVersion": "1.0.0.0",
-                    "parameters": {},
-                    "variables": {},
-                    "resources": [
-                        {
-                            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
-                            "name": "staimurgeu2/default/spark01",
-                            "apiVersion": "2021-04-01",
-                            "properties": {}
-                        }
-                    ]
-                },
-                "parameters": {}
-            },
-            "subscriptionId": "d66b1168-d835-4066-8c45-7d2ed713c082",
-            "resourceGroup": "rg-aimurg-eu2"
         }
     ]
 }

@@ -3,103 +3,151 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "clusterName": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "The name of the HDInsight cluster Gen2 to create"
             }
         },
         "clusterPoolName": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "The name of the HDInsight cluster pool where the cluster to be created"
             }
         },
         "location": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "The location where all Azure resources will be deployed"
             }
         },
         "clusterType": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "The type of the cluster to be created"
             }
         },
         "workerNodeVMSize": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "VM SKU selected for the worker node"
             }
         },
         "workerNodeCount": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "Worker node count"
             }
         },
         "clusterVersion": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "The version of the cluster to be created"
             }
         },
         "currentUserObjectId": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "Object id of the logged in user"
             }
         },
         "msiResourceId": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "User managed identity resource id"
             }
         },
         "msiClientId": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "User managed identity client id"
             }
         },
         "msiObjectId": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "User managed identity object id"
             }
         },
         "isLogAnalyticsEnabled": {
-            "type": "Bool",
+            "type": "bool",
             "metadata": {
                 "description": "Flag which enables Log Analytics for the cluster"
             }
         },
         "isLogAnalyticsStdErrorEnabled": {
-            "type": "Bool",
+            "type": "bool",
             "metadata": {
                 "description": "Flag which enables standard error logs ingestion to Log Analytics workspace"
             }
         },
         "isLogAnalyticsStdOutEnabled": {
-            "type": "Bool",
+            "type": "bool",
             "metadata": {
                 "description": "Flag which enables standard out logs ingestion to Log Analytics workspace"
             }
         },
         "isLogAnalyticsMetricsEnabled": {
-            "type": "Bool",
+            "type": "bool",
             "metadata": {
                 "description": "Flag which enables JMX metrics ingestion to Log Analytics workspace"
             }
         },
+        "hiveDBPasswordKeyVaultId": {
+            "type": "string",
+            "metadata": {
+                "description": "Resource Id of the keyvault which holds Hive metastore SQL database login password secret"
+            }
+        },
+        "hiveDBPasswordSecretName": {
+            "type": "string",
+            "metadata": {
+                "description": "Keyvault secret which holds Hive metastore SQL database login password"
+            }
+        },
+        "storageAccountEndpoint": {
+            "type": "string",
+            "metadata": {
+                "description": "Storage account endpoint"
+            }
+        },
+        "storageAccountContainer": {
+            "type": "string",
+            "metadata": {
+                "description": "Filesystem/container in the given storage"
+            }
+        },
+        "hiveCatalogName": {
+            "type": "string",
+            "metadata": {
+                "description": "Hive catalog name"
+            }
+        },
+        "hiveDatabaseServer": {
+            "type": "string",
+            "metadata": {
+                "description": "Hive metastore SQL server name"
+            }
+        },
+        "hiveDatabaseName": {
+            "type": "string",
+            "metadata": {
+                "description": "Hive metastore SQL database name"
+            }
+        },
+        "hiveDatabaseUserName": {
+            "type": "string",
+            "metadata": {
+                "description": "Hive metastore SQL database login username"
+            }
+        },
         "secureShellNodeCount": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "Secure shell (SSH) pod count"
             }
         },
         "secureShellPodPrefix": {
-            "type": "String",
+            "type": "string",
             "metadata": {
                 "description": "Secure shell (SSH) endpoint prefix"
             }
@@ -112,10 +160,10 @@
     },
     "resources": [
         {
-            "type": "Microsoft.HDInsight/clusterpools/clusters",
-            "apiVersion": "[variables('clusterGen2ApiVersion')]",
             "name": "[variables('fullClusterName')]",
+            "type": "Microsoft.HDInsight/clusterpools/clusters",
             "location": "[parameters('location')]",
+            "apiVersion": "[variables('clusterGen2ApiVersion')]",
             "tags": {},
             "properties": {
                 "clusterType": "[parameters('clusterType')]",
@@ -133,8 +181,35 @@
                     "authorizationProfile": {
                         "userIds": "[array(parameters('currentUserObjectId'))]"
                     },
-                    "secretsProfile": null,
-                    "serviceConfigsProfiles": [],
+                    "secretsProfile": {
+                        "keyVaultResourceId": "[parameters('hiveDBPasswordKeyVaultId')]",
+                        "secrets": [
+                            {
+                                "referenceName": "[parameters('hiveDBPasswordSecretName')]",
+                                "type": "secret",
+                                "keyVaultObjectName": "[parameters('hiveDBPasswordSecretName')]"
+                            }
+                        ]
+                    },
+                    "serviceConfigsProfiles": [
+                        {
+                            "serviceName": "trino",
+                            "configs": [
+                                {
+                                    "component": "catalogs",
+                                    "files": [
+                                        {
+                                            "fileName": "[concat(parameters('hiveCatalogName'), '.properties')]",
+                                            "values": {
+                                                "connector.name": "hive",
+                                                "hive.allow-drop-table": "true"
+                                            }
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    ],
                     "logAnalyticsProfile": {
                         "enabled": "[bool(parameters('isLogAnalyticsEnabled'))]",
                         "applicationLogs": {
@@ -147,7 +222,19 @@
                         "count": "[int(parameters('secureShellNodeCount'))]",
                         "podPrefix": "[parameters('secureShellPodPrefix')]"
                     },
-                    "trinoProfile": {}
+                    "trinoProfile": {
+                        "catalogOptions": {
+                            "hive": [
+                                {
+                                    "catalogName": "[parameters('hiveCatalogName')]",
+                                    "metastoreDbConnectionURL": "[concat('jdbc:sqlserver://',parameters('hiveDatabaseServer'), '.database.windows.net;database=', parameters('hiveDatabaseName'),';encrypt=true;trustServerCertificate=true;create=false;loginTimeout=30')]",
+                                    "metastoreDbConnectionUserName": "[parameters('hiveDatabaseUserName')]",
+                                    "metastoreDbConnectionPassword": "[concat('${SECRET_REF:',parameters('hiveDBPasswordSecretName'), '}')]",
+                                    "metastoreWarehouseDir": "[concat('abfs://',parameters('storageAccountContainer'), '@', parameters('storageAccountEndpoint'), '/hive/warehouse')]"
+                                }
+                            ]
+                        }
+                    }
                 }
             }
         }

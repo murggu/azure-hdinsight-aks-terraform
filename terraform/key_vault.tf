@@ -40,4 +40,8 @@ resource "azurerm_key_vault_secret" "hdi_kv_sqldb_secret" {
   name         = "sqlhdi"
   value        = azurerm_mssql_server.hdi_sql.administrator_login_password
   key_vault_id = azurerm_key_vault.hdi_kv.id
+
+  depends_on = [
+    azurerm_key_vault_access_policy.hdi_kv_access_policy
+  ]
 }

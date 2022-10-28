@@ -21,14 +21,14 @@ resource "azurerm_resource_group_template_deployment" "hdi_hilo_cluster_trino" {
     isLogAnalyticsStdErrorEnabled = { value = true }
     isLogAnalyticsStdOutEnabled   = { value = true }
     isLogAnalyticsMetricsEnabled  = { value = true }
-    # hiveDBPasswordKeyVaultId      = { value = azurerm_key_vault.hdi_kv.id }
-    # hiveDBPasswordSecretName      = { value = "sqlhdi" }
-    # storageAccountEndpoint        = { value = "${azurerm_storage_account.hdi_st.name}.dfs.core.windows.net" }
-    # storageAccountContainer       = { value = "default" }
-    # hiveCatalogName               = { value = "catalog-hive-trino-01" }
-    # hiveDatabaseServer            = { value = azurerm_mssql_server.hdi_sql.name }
-    # hiveDatabaseName              = { value = azurerm_mssql_database.hdi_sqldb.name }
-    # hiveDatabaseUserName          = { value = azurerm_mssql_server.hdi_sql.administrator_login }
+    hiveDBPasswordKeyVaultId      = { value = azurerm_key_vault.hdi_kv.id }
+    hiveDBPasswordSecretName      = { value = "sqlhdi" }
+    storageAccountEndpoint        = { value = "${azurerm_storage_account.hdi_st.name}.dfs.core.windows.net" }
+    storageAccountContainer       = { value = "default" }
+    hiveCatalogName               = { value = "catalog-hive-trino-01" }
+    hiveDatabaseServer            = { value = azurerm_mssql_server.hdi_sql.name }
+    hiveDatabaseName              = { value = azurerm_mssql_database.hdi_sqldb.name }
+    hiveDatabaseUserName          = { value = azurerm_mssql_server.hdi_sql.administrator_login }
     secureShellNodeCount          = { value = "1" }
     secureShellPodPrefix          = { value = "pod" }
   })
