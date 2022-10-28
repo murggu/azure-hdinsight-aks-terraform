@@ -26,11 +26,11 @@ resource "azurerm_resource_group_template_deployment" "hdi_hilo_cluster_spark" {
     storageAccountEndpoint        = { value = "${azurerm_storage_account.hdi_st.name}.dfs.core.windows.net" }
     storageAccountContainer       = { value = "default" }
     # hiveCatalogName               = { value = "catalog-hive-spark-01" }
-    hiveDatabaseServer            = { value = azurerm_mssql_server.hdi_sql.name }
-    hiveDatabaseName              = { value = azurerm_mssql_database.hdi_sqldb.name }
-    hiveDatabaseUserName          = { value = azurerm_mssql_server.hdi_sql.administrator_login }
-    secureShellNodeCount          = { value = "1" }
-    secureShellPodPrefix          = { value = "pod" }
+    hiveDatabaseServer   = { value = azurerm_mssql_server.hdi_sql.name }
+    hiveDatabaseName     = { value = azurerm_mssql_database.hdi_sqldb.name }
+    hiveDatabaseUserName = { value = azurerm_mssql_server.hdi_sql.administrator_login }
+    secureShellNodeCount = { value = "1" }
+    secureShellPodPrefix = { value = "pod" }
   })
 
   depends_on = [

@@ -29,12 +29,12 @@ resource "azurerm_role_assignment" "hdi_id_role_pool" {
     azurerm_user_assigned_identity.hdi_id
   ]
 
-  count = var.enable_trino_cluster ? 1 : (var.enable_spark_cluster ? 1 : 0)
+  count = var.enable_trino_cluster ? 1 : (var.enable_spark_cluster ? 1 : (var.enable_flink_cluster ? 1 : 0))
 }
 
 data "azurerm_user_assigned_identity" "hdi_id_pool" {
   name                = "${azurerm_resource_group_template_deployment.hdi_hilo_cluster_pool.name}-agentpool"
   resource_group_name = var.managed_rg_name
 
-  count = var.enable_trino_cluster ? 1 : (var.enable_spark_cluster ? 1 : 0)
+  count = var.enable_trino_cluster ? 1 : (var.enable_spark_cluster ? 1 : (var.enable_flink_cluster ? 1 : 0))
 }
