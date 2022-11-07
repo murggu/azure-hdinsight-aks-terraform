@@ -2,7 +2,7 @@ resource "azurerm_resource_group_template_deployment" "hdi_hilo_cluster_flink" {
   name                = "hilo-flink-${local.basename}"
   resource_group_name = azurerm_resource_group.hdi_rg.name
   deployment_mode     = "Incremental"
-  template_content    = file("../arm/hilo_cluster_flink.json")
+  template_content    = file("/arm/hilo_cluster_flink.json")
 
   parameters_content = jsonencode({
 

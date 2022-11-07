@@ -2,7 +2,7 @@ resource "azurerm_resource_group_template_deployment" "hdi_hilo_cluster_pool" {
   name                = "hilo-pool-${local.basename}"
   resource_group_name = azurerm_resource_group.hdi_rg.name
   deployment_mode     = "Incremental"
-  template_content    = file("../arm/hilo_cluster_pool.json")
+  template_content    = file("/arm/hilo_cluster_pool.json")
 
   parameters_content = jsonencode({
 
