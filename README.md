@@ -1,4 +1,6 @@
-# azure-hdinsight-hilo-terraform
+# azure-hdinsight-hilo-templates
+
+TO BE UPDATED
 
 This repo shows an example for rolling out a complete nextgen HDInsight environment (codename Hilo, HDInsight on AKS) via Terraform.
 
