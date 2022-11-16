@@ -5,7 +5,7 @@ This repo shows an example for rolling out a complete HDInsight on AKS environme
 This includes rollout of the following resources:
 
 - HDInsight Cluster Pool
-- HDInsight Cluster (only `trino`,  `flink` and `spark` for now, Interactive not supported yet)
+- HDInsight Cluster (only `trino`,  `flink` and `spark` for now, `interactive` not supported yet)
 - Azure Storage Account
 - Azure Key Vault
 - Virtual Network including a default subnet
