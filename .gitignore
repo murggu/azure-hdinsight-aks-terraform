@@ -10,6 +10,4 @@ terraform.tfvars
 **.tfbackend
 state/
 
-flink01.txt
-flink02.json
-hilo_cluster_flink.txt
+bicep/
