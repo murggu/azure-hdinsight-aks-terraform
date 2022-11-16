@@ -1,10 +1,6 @@
 # azure-hdinsight-hilo-templates
 
-TO BE UPDATED
-
-This repo shows an example for rolling out a complete nextgen HDInsight environment (codename Hilo, HDInsight on AKS) via Terraform.
-
-[TODO add architecture]
+This repo shows an example for rolling out a complete HDInsight on AKS environment (aka Project Hilo) via ARM and Terraform.
 
 This includes rollout of the following resources:
 
@@ -17,7 +13,9 @@ This includes rollout of the following resources:
 - Azure SQL Database
 - User Assigned Identity
 
-## Instructions
+## Deploy with ARM
+
+## Deploy with Terraform
 
 Make sure you have the [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli) and [Terraform](https://www.terraform.io/downloads.html) installed. 
 
@@ -31,7 +29,7 @@ Make sure you have the [Azure CLI](https://docs.microsoft.com/cli/azure/install-
     $ terraform apply
     ```
     
-## Notes
+### Notes
 See notes below for additional info:
 
 - The deployment needs to be made in two steps due to Hilo managed resource group name (MRG) limitation: (i) create a cluster pool first and (ii) enable cluster creation (see below) by copying the MRG name e.g. `MC_hdi-ad40b8b9a7514d76a569e20f6fd4eb90_hilo-pool-murggu-eu4_eastus2` to terraform.tfvars.
