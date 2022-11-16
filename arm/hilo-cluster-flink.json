@@ -1,0 +1,178 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "clusterpoolName": {
+        "type": "String",
+        "metadata": {
+          "description": "The cluster pool name"
+        }
+      },
+      "resourcePrefix": {
+        "type": "String",
+        "metadata": {
+          "description": "Provide a prefix for your resource, your resources will be named as [prefix + random string]."
+        }
+      },
+      "userObjectId": {
+        "type": "String",
+        "metadata": {
+          "description": "The user alias object ID from Azure Active Directory"
+        }
+      }
+    },
+    "variables": {
+      "clusterName": "[concat(parameters('clusterpoolName'), '/', parameters('resourcePrefix'), 'flinkcluster')]",
+      "msiName": "[concat(parameters('resourcePrefix'), 'MSI')]",
+      "roleAssignedGuid": "[guid(variables('msiName'), resourceGroup().id)]",
+      "storageName": "[concat(parameters('resourcePrefix'), 'store')]"
+    },
+    "resources": [
+    
+    //Cluster pool creation
+        {
+        "type": "microsoft.hdinsight/clusterpools",
+        "apiVersion": "2021-09-15-preview",
+        "name": "[parameters('clusterpoolName')]",
+        "location": "[resourceGroup().location]"
+      },
+     
+     //Pre-requisite: user MSI creation
+      {
+        "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+        "apiVersion": "2018-11-30",
+        "name": "[variables('msiName')]",
+        "location": "[resourceGroup().location]",
+        "properties": {}
+      },
+   
+    //Pre-requisite: Storage account and container creation
+       {
+        "name": "[variables('storageName')]",
+        "type": "Microsoft.Storage/storageAccounts",
+        "location": "[resourceGroup().location]",
+        "apiVersion": "2019-04-01",
+        "sku": {
+            "name": "Standard_RAGRS",
+            "tier": "Standard"
+        },
+        
+        "properties": {
+            "minimumTlsVersion": "TLS1_2",
+            "allowBlobPublicAccess": true,
+            "allowSharedKeyAccess": true,
+            "isHnsEnabled": true,
+            "networkAcls": {
+                "bypass": "AzureServices",
+                "virtualNetworkRules": [],
+                "ipRules": [],
+                "defaultAction": "Allow"
+            }
+        },
+        "kind": "StorageV2"
+    },
+    {
+        "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+        "apiVersion": "2019-06-01",
+        "name": "[concat(variables('storageName'), '/default/', 'container1')]",
+        "dependsOn": [
+            "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]"
+        ],
+        "properties": {
+            "publicAccess": "None"
+        }
+    },
+
+     //Role assignments: AKS agent pool Managed Identity Operator on user MSI after cluster pool creation is done
+     {
+        "type": "Microsoft.Authorization/roleAssignments",
+        "apiVersion": "2020-10-01-preview",
+        "name": "[variables('roleAssignedGuid')]",
+        "dependsOn": [
+          "[resourceId('microsoft.hdinsight/clusterpools',parameters('clusterpoolName'))]",
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiName'))]",
+          "[variables('msiName')]"
+          ],
+        "properties": {
+          "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'f1a07417-d97a-45cb-824c-7a7467783830')]",
+          "principalId": "[reference(resourceId('microsoft.hdinsight/clusterpools', parameters('clusterpoolName')), '2021-09-15-preview').aksClusterProfile.aksClusterAgentPoolIdentityProfile.msiObjectId]"
+        },
+        "scope": "[concat('Microsoft.ManagedIdentity/userAssignedIdentities', '/', variables('msiName'))]"
+      },
+
+      
+    //Role assignment for Storage account
+        {
+            "type": "Microsoft.Authorization/roleAssignments",
+            "apiVersion": "2018-09-01-preview",
+            "name": "[guid(variables('storageName'), resourceGroup().id)]",
+            "scope": "[concat('Microsoft.Storage/storageAccounts', '/', variables('storageName'))]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
+                "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiName'))]",
+                "[resourceId('microsoft.hdinsight/clusterpools', parameters('clusterpoolName'))]",
+                "[variables('storageName')]"  
+            ],
+            "properties": {
+                "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'b7e6dc6d-f1e8-4753-8033-0f276bb0955b')]",
+                //"principalId": "[reference(variables('msiName')).principalId]"
+                "principalId":"[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiName')), '2018-11-30').principalId]"
+            }
+            
+        },
+          
+    //Flink cluster creation
+      {
+        "type": "microsoft.hdinsight/clusterpools/clusters",
+        "apiVersion": "2021-09-15-preview",
+        "name": "[variables('clusterName')]",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+          "[resourceId('microsoft.hdinsight/clusterpools', parameters('clusterpoolName'))]",
+          "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]",
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiName'))]"
+        ],
+        "properties": {
+          "clusterType": "Flink",
+          "computeProfile": {
+            //"vmSize": "Standard_D8ds_v5",
+            //"vmSize": "Standard_D5_v2",
+            "vmSize": "Standard_D4_v2",
+            "count": 5
+          },
+          "clusterProfile": {
+            "stackVersion": "1.13.1-0.12",
+            "identityProfile": {
+              "msiResourceId": "[string(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiName')))]",
+              "msiClientId": "[string(reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiName'))).clientId)]",
+              "msiObjectId": "[string(reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiName'))).principalId)]"
+            },
+            "authorizationProfile": {
+              "userIds": [
+                "[parameters('userObjectId')]"
+              ]
+            },
+            "flinkProfile": {
+                "numReplicas": 2,
+                "jobManager": {
+                    "cpu": 1,
+                    "memory": 2000
+                },
+                "taskManager": {
+                    "cpu": 2,
+                    "memory": 2000
+                },
+                "historyServer": {
+                    "cpu": 1,
+                    "memory": 2000
+                },
+                "storage": {
+                    "storageUri": "[concat('abfs://container1', '@', variables('storageName'), '.dfs.core.windows.net')]"
+                }
+            }
+          }
+        }
+      }
+    ]
+  
+  }

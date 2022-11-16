@@ -1,0 +1,100 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "clusterpoolName": {
+        "type": "String",
+        "metadata": {
+          "description": "The cluster pool name"
+        }
+      },
+      "resourcePrefix": {
+        "type": "String",
+        "metadata": {
+          "description": "Provide a prefix for your resource, your resources will be named as [prefix + random string]."
+        }
+      },
+      "userObjectId": {
+        "type": "String",
+        "metadata": {
+          "description": "The user alias object ID from Azure Active Directory"
+        }
+      }
+    },
+    "variables": {
+      "clusterName": "[concat(parameters('clusterpoolName'), '/', parameters('resourcePrefix'), 'trinocluster')]",
+      "msiName": "[concat(parameters('resourcePrefix'), 'MSI')]",
+      "roleAssignedGuid": "[guid(variables('msiName'), resourceGroup().id)]"
+    },
+    "resources": [
+      {
+        "type": "microsoft.hdinsight/clusterpools",
+        "apiVersion": "2021-09-15-preview",
+        "name": "[parameters('clusterpoolName')]",
+        "location": "[resourceGroup().location]"
+      },
+      {
+        "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+        "apiVersion": "2018-11-30",
+        "name": "[variables('msiName')]",
+        "location": "[resourceGroup().location]",
+        "properties": {}
+      },
+      {
+        "type": "Microsoft.Authorization/roleAssignments",
+        "apiVersion": "2020-10-01-preview",
+        "name": "[variables('roleAssignedGuid')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiName'))]",
+          "[variables('msiName')]",
+          "[resourceId('microsoft.hdinsight/clusterpools',parameters('clusterpoolName'))]"
+        ],
+        "properties": {
+          "roleDefinitionId": "[concat('/subscriptions/', subscription().subscriptionId, '/providers/Microsoft.Authorization/roleDefinitions/', 'f1a07417-d97a-45cb-824c-7a7467783830')]",
+          "principalId": "[reference(resourceId('microsoft.hdinsight/clusterpools', parameters('clusterpoolName')), '2021-09-15-preview').aksClusterProfile.aksClusterAgentPoolIdentityProfile.msiObjectId]"
+        },
+        "scope": "[concat('Microsoft.ManagedIdentity/userAssignedIdentities', '/', variables('msiName'))]"
+      },
+      {
+        "type": "microsoft.hdinsight/clusterpools/clusters",
+        "apiVersion": "2021-09-15-preview",
+        "name": "[variables('clusterName')]",
+        "location": "[resourceGroup().location]",
+        "dependsOn": [
+          "[resourceId('microsoft.hdinsight/clusterpools', parameters('clusterpoolName'))]",
+          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiName'))]"
+        ],
+        "properties": {
+          "clusterType": "Trino",
+          "computeProfile": {
+            //"vmSize": "Standard_D8ds_v5",
+            //"vmSize": "Standard_D5_v2",
+            "vmSize": "Standard_D4_v2",
+            "count": 5
+          },
+          "clusterProfile": {
+            "stackVersion": "0.381.0-0.1",
+            "identityProfile": {
+              "msiResourceId": "[string(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiName')))]",
+              "msiClientId": "[string(reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiName'))).clientId)]",
+              "msiObjectId": "[string(reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('msiName'))).principalId)]"
+            },
+            "authorizationProfile": {
+              "userIds": [
+                "[parameters('userObjectId')]"
+              ]
+            }
+          }
+        }
+      }
+    ],
+    "outputs": {
+      "managedIdentityResourceId": {
+        "type": "String",
+        "value": "[reference(resourceId('microsoft.hdinsight/clusterpools', parameters('clusterpoolName')), '2021-09-15-preview').aksClusterProfile.aksClusterAgentPoolIdentityProfile.msiResourceId]",
+        "metadata": {
+          "description": "The resource ID of the user-assigned managed identity."
+        }
+      }
+    }
+  }
