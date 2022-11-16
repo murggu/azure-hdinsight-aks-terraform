@@ -15,6 +15,13 @@ This includes rollout of the following resources:
 
 ## Deploy with ARM
 
+| Name | Status |
+| - | - |
+| Flink | [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://raw.githubusercontent.com/murggu/azure-hdinsight-hilo-templates/main/arm/Pre-requisite%20ARM%20-%20Flink.json?token=GHSAT0AAAAAAB2JQZOTG2INLYE54JE6AGPUY3U6AVA)|
+| Spark | TBC |
+| Trino | TBC |
+| Trino with HMS | TBC |
+
 ## Deploy with Terraform
 
 Make sure you have the [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli) and [Terraform](https://www.terraform.io/downloads.html) installed. 
