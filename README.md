@@ -15,9 +15,9 @@ This includes rollout of the following resources:
 
 ## Deploy with ARM
 
-| Name | Status |
+| Cluster type | Status |
 | - | - |
-| Flink | [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://raw.githubusercontent.com/murggu/azure-hdinsight-hilo-templates/main/arm/Pre-requisite%20ARM%20-%20Flink.json?token=GHSAT0AAAAAAB2JQZOTG2INLYE54JE6AGPUY3U6AVA)|
+| Flink | [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmurggu%2Fazure-hdinsight-hilo-templates%2Fmain%2Farm%2FPre-requisite%2520ARM%2520-%2520Flink.json%3Ftoken%3DGHSAT0AAAAAAB2JQZOTG2INLYE54JE6AGPUY3U6AVA)|
 | Spark | TBC |
 | Trino | TBC |
 | Trino with HMS | TBC |
