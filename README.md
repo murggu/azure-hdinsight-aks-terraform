@@ -21,6 +21,8 @@ This includes rollout of the following resources:
 4. Click on **Build your own template in the editor**
 5. From the downloaded artifact, load the appropiate cluster template within the arm folder
 
+See [Getting started with one click deployment](https://review.learn.microsoft.com/en-us/hdinsight-hilo/getting-started?branch=main) for one-click deployment.
+
 ## Deploy with Terraform
 
 Make sure you have the [Azure CLI](https://docs.microsoft.com/cli/azure/install-azure-cli) and [Terraform](https://www.terraform.io/downloads.html) installed. 
