@@ -15,12 +15,11 @@ This includes rollout of the following resources:
 
 ## Deploy with ARM
 
-| Cluster type | Status |
-| - | - |
-| Flink | [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmurggu%2Fazure-hdinsight-hilo-templates%2Fmain%2Farm%2FPre-requisite%2520ARM%2520-%2520Flink.json%3Ftoken%3DGHSAT0AAAAAAB2JQZOTG2INLYE54JE6AGPUY3U6AVA)|
-| Spark | TBC |
-| Trino | TBC |
-| Trino with HMS | TBC |
+1. Download this repo
+2. Go to the [Azure portal](https://portal.azure.com/) and sign in
+3. From the Azure portal search bar, search for **Deploy a custom template** and then select it from the available options
+4. Click on **Build your own template in the editor**
+5. From the downloaded artifact, load the appropiate cluster template within the arm folder
 
 ## Deploy with Terraform
 
