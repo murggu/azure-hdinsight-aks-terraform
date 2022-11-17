@@ -1,6 +1,6 @@
 resource "azapi_resource" "hdi_hilo_cluster_flink" {
   type                      = "Microsoft.HDInsight/clusterpools/clusters@2021-09-15-preview"
-  name                      = "flink1-${local.basename}"
+  name                      = "flink-${local.basename}"
   parent_id                 = azapi_resource.hdi_hilo_cluster_pool.id
   location                  = azurerm_resource_group.hdi_rg.location
   schema_validation_enabled = false
@@ -9,7 +9,7 @@ resource "azapi_resource" "hdi_hilo_cluster_flink" {
     properties = {
       clusterType = "flink",
       computeProfile = {
-        vmSize = "Standard_A7",
+        vmSize = "Standard_D14_v2",
         count  = 5
       },
       clusterProfile = {
@@ -37,21 +37,21 @@ resource "azapi_resource" "hdi_hilo_cluster_flink" {
           podPrefix = "pod"
         },
         flinkProfile = {
-          numReplicas = "2",
+          numReplicas = 2,
           jobManager = {
             cpu    = 1,
-            memory = "2000"
+            memory = 2000
           },
           taskManager = {
             cpu    = 2,
-            memory = "2000"
+            memory = 2000
           },
           historyServer = {
             cpu    = 1,
-            memory = "2000"
+            memory = 2000
           },
           storage = {
-            storageUri = "abfs://${azurerm_storage_account.hdi_st.name}.dfs.core.windows.net@default"
+            storageUri = "abfs://default@${azurerm_storage_account.hdi_st.name}"
           }
         }
       }

@@ -32,7 +32,7 @@ resource "azapi_resource" "hdi_hilo_cluster_spark" {
             }
           ]
         },
-                            serviceConfigsProfiles = [],
+        serviceConfigsProfiles = [],
         logAnalyticsProfile = {
           enabled = true,
           applicationLogs = {
@@ -46,16 +46,16 @@ resource "azapi_resource" "hdi_hilo_cluster_spark" {
           podPrefix = "pod"
         },
         sparkProfile = {
-                        defaultStorageUrl = "abfs://default@${azurerm_storage_account.hdi_st.name}.dfs.core.windows.net/",
-                        metastoreSpec = {
-                            dbServerHost = "${azurerm_mssql_server.hdi_sql.name}.database.windows.net",
-                            dbName = azurerm_mssql_database.hdi_sqldb.name,
-                            dbUserName = azurerm_mssql_server.hdi_sql.administrator_login,
-                            dbPasswordSecretName = "sqlhdi",
-                            keyvaultId = azurerm_key_vault.hdi_kv.id,
-                            keyVaultId = azurerm_key_vault.hdi_kv.id
-                        }
-                    }
+          defaultStorageUrl = "abfs://default@${azurerm_storage_account.hdi_st.name}.dfs.core.windows.net/",
+          metastoreSpec = {
+            dbServerHost         = "${azurerm_mssql_server.hdi_sql.name}.database.windows.net",
+            dbName               = azurerm_mssql_database.hdi_sqldb.name,
+            dbUserName           = azurerm_mssql_server.hdi_sql.administrator_login,
+            dbPasswordSecretName = "sqlhdi",
+            keyvaultId           = azurerm_key_vault.hdi_kv.id,
+            keyVaultId           = azurerm_key_vault.hdi_kv.id
+          }
+        }
       }
     }
   })

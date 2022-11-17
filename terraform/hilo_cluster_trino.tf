@@ -9,7 +9,7 @@ resource "azapi_resource" "hdi_hilo_cluster_trino" {
     properties = {
       clusterType = "trino",
       computeProfile = {
-        vmSize = "Standard_D8as_v4",
+        vmSize = "Standard_A8m_v2",
         count  = 5
       },
       clusterProfile = {
@@ -42,7 +42,7 @@ resource "azapi_resource" "hdi_hilo_cluster_trino" {
                   {
                     fileName = "catalog-hive-trino-01.properties",
                     values = {
-                      "connector.name" = "hive"
+                      "connector.name"        = "hive"
                       "hive.allow-drop-table" = "true"
                     }
                   }
@@ -70,7 +70,7 @@ resource "azapi_resource" "hdi_hilo_cluster_trino" {
                 catalogName                   = "catalog-hive-trino-01",
                 metastoreDbConnectionURL      = "jdbc:sqlserver://${azurerm_mssql_server.hdi_sql.name}.database.windows.net;database=${azurerm_mssql_database.hdi_sqldb.name};encrypt=true;trustServerCertificate=true;create=false;loginTimeout=30",
                 metastoreDbConnectionUserName = azurerm_mssql_server.hdi_sql.administrator_login,
-                metastoreDbConnectionPassword = "$${SECRET_REF:'sqlhdi'}",
+                metastoreDbConnectionPassword = azurerm_mssql_server.hdi_sql.administrator_login_password,
                 metastoreWarehouseDir         = "abfs://default@${azurerm_storage_account.hdi_st.name}.dfs.core.windows.net/hive/warehouse"
               }
             ]
