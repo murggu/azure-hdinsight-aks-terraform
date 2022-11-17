@@ -16,11 +16,6 @@ variable "location" {
   default     = "East US 2"
 }
 
-variable "managed_rg_name" {
-  type        = string
-  description = "Location for modules"
-}
-
 variable "enable_trino_cluster" {
   description = "Variable to enable or disable Trino cluster deployment"
   default     = false

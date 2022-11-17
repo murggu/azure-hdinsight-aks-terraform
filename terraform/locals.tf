@@ -1,6 +1,6 @@
 locals {
   tags = {
-    Owner   = "Synapse CSE"
+    Owner   = "HDI CSE"
     Toolkit = "Terraform"
   }
 
