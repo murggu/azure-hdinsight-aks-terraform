@@ -1,6 +1,6 @@
 # azure-hdinsight-hilo-templates
 
-This repo shows an example for rolling out a complete HDInsight on AKS environment (aka Project Hilo) via ARM and Terraform.
+This repo shows an example for rolling out a complete HDInsight on AKS environment (aka Project Hilo) via Terraform.
 
 This includes rollout of the following resources:
 
@@ -12,16 +12,6 @@ This includes rollout of the following resources:
 - Log Analytics Workspace
 - Azure SQL Database
 - User Assigned Identity
-
-## Deploy with ARM
-
-1. Download this repo
-2. Go to the [Azure portal](https://portal.azure.com/) and sign in
-3. From the Azure portal search bar, search for **Deploy a custom template** and then select it from the available options
-4. Click on **Build your own template in the editor**
-5. From the downloaded artifact, load the appropiate cluster template within the arm folder
-
-See [Getting started with one click deployment](https://review.learn.microsoft.com/en-us/hdinsight-hilo/getting-started?branch=main) for one-click deployment.
 
 ## Deploy with Terraform
 
