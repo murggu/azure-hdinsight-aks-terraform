@@ -16,3 +16,17 @@ resource "azurerm_mssql_database" "hdi_sqldb" {
 
   tags = local.tags
 }
+
+resource "azurerm_sql_firewall_rule" "metastore_server_rule" {
+  name                = "AllowAzureServices"
+  resource_group_name = azurerm_resource_group.hdi_rg.name
+  server_name         = azurerm_mssql_server.hdi_sql.name
+  start_ip_address    = "0.0.0.0"
+  end_ip_address      = "0.0.0.0"
+}
+
+resource "azurerm_mssql_virtual_network_rule" "sql_vnet_rule" {
+  name      = "sql-vnet-rule"
+  server_id = azurerm_mssql_server.hdi_sql.id
+  subnet_id = azurerm_subnet.hdi_snet_default.id
+}

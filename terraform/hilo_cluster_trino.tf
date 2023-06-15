@@ -9,11 +9,23 @@ resource "azapi_resource" "hdi_hilo_cluster_trino" {
     properties = {
       clusterType = "trino",
       computeProfile = {
-        vmSize = "Standard_A8m_v2",
-        count  = 5
+        #   vmSize = "Standard_A8m_v2",
+        #   count  = 5
+        nodes = [
+          {
+            type   = "head",
+            vmSize = "Standard_D8ds_v5",
+            count  = 3
+          },
+          {
+            type   = "worker",
+            vmSize = "Standard_D8ds_v5",
+            count  = 2
+          }
+        ]
       },
       clusterProfile = {
-        stackVersion = "0.381.0-0.1",
+        stackVersion = var.trino_version,
         identityProfile = {
           msiResourceId = azurerm_user_assigned_identity.hdi_id.id,
           msiClientId   = azurerm_user_assigned_identity.hdi_id.client_id,

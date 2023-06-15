@@ -1,6 +1,6 @@
 locals {
   tags = {
-    Owner   = "HDI CSE"
+    Owner   = "Fabric CAT"
     Toolkit = "Terraform"
   }
 

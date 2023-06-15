@@ -9,11 +9,21 @@ resource "azapi_resource" "hdi_hilo_cluster_spark" {
     properties = {
       clusterType = "spark",
       computeProfile = {
-        vmSize = "Standard_D8as_v4",
-        count  = 5
+        nodes = [
+          {
+            type   = "head",
+            vmSize = "Standard_D8ds_v5",
+            count  = 3
+          },
+          {
+            type   = "worker",
+            vmSize = "Standard_D8ds_v5",
+            count  = 2
+          }
+        ]
       },
       clusterProfile = {
-        stackVersion = "3.1.2-0.1",
+        stackVersion = var.spark_version,
         identityProfile = {
           msiResourceId = azurerm_user_assigned_identity.hdi_id.id,
           msiClientId   = azurerm_user_assigned_identity.hdi_id.client_id,
@@ -52,7 +62,6 @@ resource "azapi_resource" "hdi_hilo_cluster_spark" {
             dbName               = azurerm_mssql_database.hdi_sqldb.name,
             dbUserName           = azurerm_mssql_server.hdi_sql.administrator_login,
             dbPasswordSecretName = "sqlhdi",
-            keyvaultId           = azurerm_key_vault.hdi_kv.id,
             keyVaultId           = azurerm_key_vault.hdi_kv.id
           }
         }

@@ -9,11 +9,23 @@ resource "azapi_resource" "hdi_hilo_cluster_flink" {
     properties = {
       clusterType = "flink",
       computeProfile = {
-        vmSize = "Standard_D14_v2",
-        count  = 5
+        # vmSize = "Standard_D14_v2",
+        # count  = 5
+        nodes = [
+          {
+            type   = "head",
+            vmSize = "Standard_D8ds_v5",
+            count  = 2
+          },
+          {
+            type   = "worker",
+            vmSize = "Standard_D8ds_v5",
+            count  = 3
+          }
+        ]
       },
       clusterProfile = {
-        stackVersion = "1.13.1-0.3",
+        stackVersion = var.flink_version,
         identityProfile = {
           msiResourceId = azurerm_user_assigned_identity.hdi_id.id,
           msiClientId   = azurerm_user_assigned_identity.hdi_id.client_id,
@@ -51,7 +63,7 @@ resource "azapi_resource" "hdi_hilo_cluster_flink" {
             memory = 2000
           },
           storage = {
-            storageUri = "abfs://default@${azurerm_storage_account.hdi_st.name}"
+            storageUri = "abfs://default@${azurerm_storage_account.hdi_st.name}.dfs.core.windows.net"
           }
         }
       }

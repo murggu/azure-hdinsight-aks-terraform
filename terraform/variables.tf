@@ -16,9 +16,21 @@ variable "location" {
   default     = "East US 2"
 }
 
+variable "trino_version" {
+  type        = string
+  description = "Trino version"
+  default     = "0.407.0-0.3"
+}
+
 variable "enable_trino_cluster" {
   description = "Variable to enable or disable Trino cluster deployment"
   default     = false
+}
+
+variable "spark_version" {
+  type        = string
+  description = "Spark version"
+  default     = "3.3.1-0.1"
 }
 
 variable "enable_spark_cluster" {
@@ -26,9 +38,10 @@ variable "enable_spark_cluster" {
   default     = false
 }
 
-variable "enable_interactive_cluster" {
-  description = "Variable to enable or disable Interactive cluster deployment"
-  default     = false
+variable "flink_version" {
+  type        = string
+  description = "Flink version"
+  default     = "1.16.0-0.0"
 }
 
 variable "enable_flink_cluster" {
