@@ -63,7 +63,7 @@ resource "azapi_resource" "hdi_hilo_cluster_flink" {
             memory = 2000
           },
           storage = {
-            storageUri = "abfs://default@${azurerm_storage_account.hdi_st.name}.dfs.core.windows.net"
+            storageUri = "abfs://default@${azurerm_storage_account.hdi_st.primary_dfs_host}"
           }
         }
       }
