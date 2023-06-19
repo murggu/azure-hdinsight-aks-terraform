@@ -51,12 +51,12 @@ resource "azapi_resource" "hdi_hilo_cluster_flink" {
         flinkProfile = {
           numReplicas = 2,
           jobManager = {
-            cpu    = 1,
-            memory = 2000
+            cpu    = 4,
+            memory = 8000
           },
           taskManager = {
-            cpu    = 2,
-            memory = 2000
+            cpu    = 4,
+            memory = 4000
           },
           historyServer = {
             cpu    = 1,
